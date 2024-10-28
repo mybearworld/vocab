@@ -34,6 +34,8 @@ const (
 	gray           = "\x1b[90m"
 	reset          = "\x1b[0m"
 	deleteLastLine = cursorUp + deleteLine
+
+	modeReverse = "reverse"
 )
 
 func getWords(filename string) ([]Word, error) {
@@ -49,18 +51,18 @@ func getWords(filename string) ([]Word, error) {
 	return words, nil
 }
 
-func testVocab(words []Word) (int, error) {
+func testVocab(words []Word, mode string) (int, error) {
 	reader := bufio.NewReader(os.Stdin)
-	return testVocabReader(reader, words)
+	return testVocabReader(reader, words, mode)
 }
 
-func testVocabReader(reader *bufio.Reader, words []Word) (int, error) {
+func testVocabReader(reader *bufio.Reader, words []Word, mode string) (int, error) {
 	correctCount := 0
 	incorrect := make([]Word, 0, len(words))
 	for len(words) != 0 {
 		i := rand.IntN(len(words))
 		word := words[i]
-		correct, err := testWord(reader, word)
+		correct, err := testWord(reader, word, mode)
 		if err != nil {
 			return 0, err
 		}
@@ -78,7 +80,7 @@ func testVocabReader(reader *bufio.Reader, words []Word) (int, error) {
 			ones = "one"
 		}
 		fmt.Printf("\nLet's try the %s you missed again.\n", ones)
-		_, err := testVocabReader(reader, incorrect)
+		_, err := testVocabReader(reader, incorrect, mode)
 		if err != nil {
 			return 0, err
 		}
@@ -86,24 +88,30 @@ func testVocabReader(reader *bufio.Reader, words []Word) (int, error) {
 	return correctCount, nil
 }
 
-func testWord(reader *bufio.Reader, word Word) (bool, error) {
-	fmt.Printf("What is \"%s\"?\n> ", word.Source)
+func testWord(reader *bufio.Reader, word Word, mode string) (bool, error) {
+	source := word.Source
+	target := word.Target
+	if mode == modeReverse {
+		source = word.Target
+		target = word.Source
+	}
+	fmt.Printf("What is \"%s\"?\n> ", source)
 	answer, err := reader.ReadString('\n')
 	if err != nil {
 		return false, err
 	}
 	answer = answer[:len(answer)-1] // Remove new line
-	correct := answer == word.Target
+	correct := answer == target
 	color := red
 	if correct {
 		color = green
 	}
 	fmt.Printf("%s%s%sWhat is \"%s\"? %s%s\n", deleteLastLine, deleteLastLine,
-		color, word.Source, answer, reset)
+		color, source, answer, reset)
 	if !correct {
-		fmt.Printf("  %sCorrect: %s%s\n", gray, word.Target, reset)
+		fmt.Printf("  %sCorrect: %s%s\n", gray, target, reset)
 	}
-	return answer == word.Target, nil
+	return correct, nil
 }
 
 func run() error {
@@ -111,11 +119,15 @@ func run() error {
 		return errors.New("please specify a file with the vocabulary in it")
 	}
 	filename := os.Args[1]
+	mode := ""
+	if len(os.Args) >= 3 {
+		mode = os.Args[2]
+	}
 	words, err := getWords(filename)
 	if err != nil {
 		return err
 	}
-	correct, err := testVocab(words)
+	correct, err := testVocab(words, mode)
 	if err != nil {
 		return err
 	}

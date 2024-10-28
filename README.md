@@ -13,7 +13,7 @@ go install github.com/mybearworld/vocab@1.0.0
 ## Usage
 
 ```
-vocab ./path/to/vocab.json
+vocab ./path/to/vocab.json [mode]
 ```
 
 The vocab.json file contains data in this format:
@@ -26,3 +26,7 @@ The vocab.json file contains data in this format:
   ...
 ]
 ```
+
+The mode can be:
+
+- `reverse`: Asks the questions the other way around.
