@@ -7,7 +7,7 @@ A Go program to test your knowledge of some vocab.
 Install with:
 
 ```bash
-go install github.com/mybearworld/vocab@1.0.0
+go install github.com/mybearworld/vocab@1.1.0
 ```
 
 ## Usage
