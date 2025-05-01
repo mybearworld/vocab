@@ -1,13 +1,14 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 	rand "math/rand/v2"
 	"os"
+
+	"github.com/chzyer/readline"
 )
 
 type Word struct {
@@ -52,17 +53,20 @@ func getWords(filename string) ([]Word, error) {
 }
 
 func testVocab(words []Word, mode string) (int, error) {
-	reader := bufio.NewReader(os.Stdin)
-	return testVocabReader(reader, words, mode)
+	readline, err := readline.New("> ")
+	if err != nil {
+		return 0, err
+	}
+	return testVocabReader(readline, words, mode)
 }
 
-func testVocabReader(reader *bufio.Reader, words []Word, mode string) (int, error) {
+func testVocabReader(readline *readline.Instance, words []Word, mode string) (int, error) {
 	correctCount := 0
 	incorrect := make([]Word, 0, len(words))
 	for len(words) != 0 {
 		i := rand.IntN(len(words))
 		word := words[i]
-		correct, err := testWord(reader, word, mode)
+		correct, err := testWord(readline, word, mode)
 		if err != nil {
 			return 0, err
 		}
@@ -80,7 +84,7 @@ func testVocabReader(reader *bufio.Reader, words []Word, mode string) (int, erro
 			ones = "one"
 		}
 		fmt.Printf("\nLet's try the %s you missed again.\n", ones)
-		_, err := testVocabReader(reader, incorrect, mode)
+		_, err := testVocabReader(readline, incorrect, mode)
 		if err != nil {
 			return 0, err
 		}
@@ -88,7 +92,7 @@ func testVocabReader(reader *bufio.Reader, words []Word, mode string) (int, erro
 	return correctCount, nil
 }
 
-func testWord(reader *bufio.Reader, word Word, mode string) (bool, error) {
+func testWord(readline *readline.Instance, word Word, mode string) (bool, error) {
 	source := word.Source
 	target := word.Target
 	if mode == modeReverse {
@@ -96,11 +100,10 @@ func testWord(reader *bufio.Reader, word Word, mode string) (bool, error) {
 		target = word.Source
 	}
 	fmt.Printf("What is \"%s\"?\n> ", source)
-	answer, err := reader.ReadString('\n')
+	answer, err := readline.Readline()
 	if err != nil {
 		return false, err
 	}
-	answer = answer[:len(answer)-1] // Remove new line
 	correct := answer == target
 	color := red
 	if correct {
