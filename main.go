@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	rand "math/rand/v2"
+	"net/url"
 	"os"
 
 	"github.com/chzyer/readline"
@@ -35,6 +36,9 @@ const (
 	gray           = "\x1b[90m"
 	reset          = "\x1b[0m"
 	deleteLastLine = cursorUp + deleteLine
+	linkPrefix     = "\x1b]8;;"
+	linkSuffix     = "\a"
+	endLink        = linkPrefix + linkSuffix
 
 	modeReverse = "reverse"
 )
@@ -109,10 +113,11 @@ func testWord(readline *readline.Instance, word Word, mode string) (bool, error)
 	if correct {
 		color = green
 	}
-	fmt.Printf("%s%s%sWhat is \"%s\"? %s%s\n", deleteLastLine, deleteLastLine,
-		color, source, answer, reset)
+	wiktionaryURL := fmt.Sprintf("%shttps://en.wiktionary.org/wiki/Special:Search?search=%s%s", linkPrefix, url.QueryEscape(target), linkSuffix)
+	fmt.Printf("%s%s%sWhat is \"%s\"? %s%s%s%s\n", deleteLastLine, deleteLastLine,
+		color, source, wiktionaryURL, answer, endLink, reset)
 	if !correct {
-		fmt.Printf("  %sCorrect: %s%s\n", gray, target, reset)
+		fmt.Printf("  %sCorrect: %s%s%s%s\n", gray, wiktionaryURL, target, endLink, reset)
 	}
 	return correct, nil
 }
