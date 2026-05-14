@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/chzyer/readline"
+	"github.com/ergochat/readline"
 )
 
 type Word struct {
@@ -57,7 +57,7 @@ func getWords(filename string) ([]Word, error) {
 }
 
 func testVocab(words []Word, mode string) (int, error) {
-	readline, err := readline.New("> ")
+	readline, err := readline.New("")
 	if err != nil {
 		return 0, err
 	}
@@ -104,7 +104,7 @@ func testWord(readline *readline.Instance, word Word, mode string) (bool, error)
 		target = word.Source
 	}
 	fmt.Printf("What is \"%s\"?\n> ", source)
-	answer, err := readline.Readline()
+	answer, err := readline.ReadLine()
 	if err != nil {
 		return false, err
 	}
