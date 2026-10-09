@@ -7,8 +7,12 @@ A Go program to test your knowledge of some vocab.
 Install with:
 
 ```bash
-go install github.com/mybearworld/vocab@1.3.1
+go install github.com/mybearworld/vocab@1.3.2
 ```
+
+> [!NOTE]
+> If you are using Termux, set the `VOCAB_IS_TERMUX` environment variable to
+> ensure command line arguments are passed properly.
 
 ## Usage
 
