@@ -123,13 +123,17 @@ func testWord(readline *readline.Instance, word Word, mode string) (bool, error)
 }
 
 func run() error {
-	if len(os.Args) < 2 {
+	argsOffset := 0
+	if _, isTermux := os.LookupEnv("VOCAB_IS_TERMUX"); isTermux {
+		argsOffset = 1
+	}
+	if len(os.Args) < 2+argsOffset {
 		return errors.New("please specify a file with the vocabulary in it")
 	}
-	filename := os.Args[1]
+	filename := os.Args[1+argsOffset]
 	mode := ""
-	if len(os.Args) >= 3 {
-		mode = os.Args[2]
+	if len(os.Args) >= 3+argsOffset {
+		mode = os.Args[2+argsOffset]
 	}
 	words, err := getWords(filename)
 	if err != nil {
